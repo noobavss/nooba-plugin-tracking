@@ -1,37 +1,37 @@
-#include "templateplugin.h"
+#include "trackingplugin.h"
 #include <QtCore>
 #include <opencv2/core/core.hpp>
 
-TemplatePlugin::TemplatePlugin()
+TrackingPlugin::TrackingPlugin()
 {
 
 }
 
-TemplatePlugin::~TemplatePlugin()
+TrackingPlugin::~TrackingPlugin()
 {
 
 }
 
-bool TemplatePlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &params )
+bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &params )
 {
 
     return true;
 }
 
-bool TemplatePlugin::init()
+bool TrackingPlugin::init()
 {
     return true;
 }
 
-bool TemplatePlugin::release()
+bool TrackingPlugin::release()
 {
     return true;
 }
 
-PluginInfo TemplatePlugin::getPluginInfo() const
+PluginInfo TrackingPlugin::getPluginInfo() const
 {
     PluginInfo pluginInfo(
-        "Template Plugin",
+        "Tracking Plugin",
         0,
         1,
         "Plugin Description goes here",
@@ -43,5 +43,5 @@ PluginInfo TemplatePlugin::getPluginInfo() const
 // see qt4 documentation for details on the macro (Qt Assistant app)
 // Mandatory  macro for plugins in qt4. Made obsolete in qt5
 #if QT_VERSION < 0x050000
-    Q_EXPORT_PLUGIN2(TemplatePlugin, TemplatePlugin);
+    Q_EXPORT_PLUGIN2(TrackingPlugin, TrackingPlugin);
 #endif

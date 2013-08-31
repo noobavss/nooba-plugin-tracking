@@ -1,4 +1,4 @@
-nooba-plugin-template
+nooba-plugin-tracking
 =====================
 
-template plugin for the current Nooba plugin API
+tracking plugin for the current Nooba plugin API

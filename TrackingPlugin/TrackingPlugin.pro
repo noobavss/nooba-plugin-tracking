@@ -6,19 +6,19 @@ CONFIG(release, debug|release):    message(Release build!)
 
 QT -= gui
 
-TARGET = templatePlugin
+TARGET = trackingPlugin
 
-CONFIG(debug, debug|release): TARGET = TestPlugin_Debug
-CONFIG(release, debug|release): TARGET = TestPlugin_Release
+CONFIG(debug, debug|release): TARGET = TrackingPlugin_Debug
+CONFIG(release, debug|release): TARGET = TrackingPlugin_Release
 
 TEMPLATE = lib
 CONFIG += dll
 
-DEFINES += TEMPLATEPLUGIN_LIB
+DEFINES += TRACKINGPLUGIN_LIB
 
 # Input
-HEADERS += templateplugin.h templateplugin_global.h
-SOURCES += templateplugin.cpp
+HEADERS += trackingplugin.h trackingplugin_global.h
+SOURCES += trackingplugin.cpp
 
 CONFIG(debug, debug|release): DESTDIR = $$PWD/../../../NoobaVSS_build/NoobaFE/Debug/plugins/
 CONFIG(release, debug|release): DESTDIR = $$PWD/../../../NoobaVSS_build/NoobaFE/Release/plugins/

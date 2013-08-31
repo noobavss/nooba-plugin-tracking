@@ -35,23 +35,23 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="templateplugin.cpp">
+    <ClCompile Include="trackingplugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_templateplugin.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_trackingplugin.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_templateplugin.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_trackingplugin.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="templateplugin_global.h">
+    <ClInclude Include="trackingplugin_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="templateplugin.h">
+    <CustomBuild Include="trackingplugin.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
