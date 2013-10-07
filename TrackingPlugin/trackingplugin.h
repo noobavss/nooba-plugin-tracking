@@ -6,6 +6,10 @@
 
 #include <QObject>
 
+#include "package_bgs/StaticFrameDifferenceBGS.h"
+#include "package_tracking/BlobTracking.h"
+#include "package_analysis/BlobCounting.h"
+
 class TRACKINGPLUGIN_EXPORT TrackingPlugin: public NoobaPluginAPI
 {
     Q_OBJECT
@@ -24,6 +28,11 @@ public:
     PluginInfo getPluginInfo() const;
 
 private:
+    cv::Mat img_blob;
+    cv::Mat img_mask;
+    StaticFrameDifferenceBGS bgs;
+    BlobTracking blobTracking;
+    BlobCounting blobCounting;
 
 };
 
