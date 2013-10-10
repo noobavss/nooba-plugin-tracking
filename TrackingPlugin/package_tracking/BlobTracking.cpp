@@ -3,11 +3,11 @@
 BlobTracking::BlobTracking() : firstTime(true),
 		minArea(500), maxArea(20000), debugTrack(false), 
 		debugBlob(false), showBlobMask(false), showOutput(true),
-        file("/home/chathuranga/Programming/FYP/data/text/2013-10-07-blob_centroids.txt"),frameIndex(0)
+        frameIndex(0)
 {
   std::cout << "BlobTracking()" << std::endl;
-  if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
- 		return;
+  //if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+  //		return;
 }
 
 BlobTracking::~BlobTracking()
@@ -16,10 +16,21 @@ BlobTracking::~BlobTracking()
   std::cout << "~BlobTracking()" << std::endl;
 }
 
+void BlobTracking::setOutputFile(QString output_location)
+{
+    file.close();
+    file.setFileName(output_location);
+
+  std::cout << "Opening Output File" << std::endl;
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+}
+
 const cvb::CvTracks BlobTracking::getTracks()
 {
   return tracks;
 }
+
 
 void BlobTracking::process(const cv::Mat &img_input, const cv::Mat &img_mask, cv::Mat &img_output)
 {

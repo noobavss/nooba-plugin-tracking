@@ -7,8 +7,11 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
+#include <QDebug>
+
 TrackingPlugin::TrackingPlugin()
 {
+
 
 }
 
@@ -20,15 +23,17 @@ TrackingPlugin::~TrackingPlugin()
 bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &params )
 {
 
-    cv::cvtColor(in, out, CV_BGR2GRAY);
 
     img_mask = in.clone();
 
     // bgs->process(...) method internally shows the foreground mask image
     bgs.process(in, img_mask);
     blobTracking.process(in, img_mask, img_blob);
-    cv::imshow("mask", img_mask);
-    cv::imshow("blob", img_blob);
+
+    cv::cvtColor(img_blob, out, CV_BGR2GRAY);
+
+    //cv::imshow("mask", img_mask);
+    //cv::imshow("blob", img_blob);
     // Perform blob counting
     blobCounting.setInput(img_blob);
     blobCounting.setTracks(blobTracking.getTracks());
@@ -39,6 +44,9 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
 
 bool TrackingPlugin::init()
 {
+    output_location = "/home/chathuranga/Programming/FYP/data/text/2013-10-07-blob_centroids.txt";
+    createStringParam("output_location",output_location,false);
+    blobTracking.setOutputFile(output_location);
     return true;
 }
 
@@ -56,6 +64,14 @@ PluginInfo TrackingPlugin::getPluginInfo() const
         "Blob tracking and counting using cvBlob and BGS library",
         "Chathuranga Hettiarachchi");
     return pluginInfo;
+}
+
+void TrackingPlugin:: onStringParamChanged(const QString& varName, const QString& val){
+    if(varName == "output_location"){
+        setProperty("output_location",val);
+        blobTracking.setOutputFile(output_location);
+        debugMsg("output_location set to "  + val);
+    }
 }
 
 

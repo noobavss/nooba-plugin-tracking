@@ -26,8 +26,11 @@ public:
     bool init();
     bool release();
     PluginInfo getPluginInfo() const;
+public slots:
+    void onStringParamChanged(const QString& varName, const QString& val);
 
 private:
+    QString output_location;
     cv::Mat img_blob;
     cv::Mat img_mask;
     StaticFrameDifferenceBGS bgs;

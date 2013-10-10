@@ -18,7 +18,9 @@ namespace FAV1
   {
     if(!use_roi)
       return;
-  
+    if(roi_defined){
+        return;
+    }
     if(evt == CV_EVENT_LBUTTONDOWN)
     {
       if(!startDraw)

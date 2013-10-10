@@ -31,6 +31,7 @@ public:
   BlobTracking();
   ~BlobTracking();
 
+  void setOutputFile(QString output_location);
   void process(const cv::Mat &img_input, const cv::Mat &img_mask, cv::Mat &img_output);
   const cvb::CvTracks getTracks();
 };
