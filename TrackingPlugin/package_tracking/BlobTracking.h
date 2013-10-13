@@ -4,7 +4,9 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+
 #include "cvblob/cvblob.h"
+
 #include <QFile>
 #include <QTextStream>
 

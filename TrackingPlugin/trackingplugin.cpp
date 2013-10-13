@@ -44,7 +44,7 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
 
 bool TrackingPlugin::init()
 {
-    output_location = "/home/chathuranga/Programming/FYP/data/text/2013-10-07-blob_centroids.txt";
+    output_location = "/home/chathuranga/Programming/FYP/data/text/2013-10-13-blob_centroids.txt";
     createStringParam("output_location",output_location,false);
     blobTracking.setOutputFile(output_location);
     return true;

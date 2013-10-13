@@ -169,181 +169,185 @@ namespace cvb
 
     try
     {
-      // Inicialization:
-      unsigned int i=0;
-      for (CvBlobs::const_iterator it = blobs.begin(); it!=blobs.end(); ++it, i++)
-      {
-	AB(i) = 0;
-	IB(i) = it->second->label;
-      }
+        // Initialization:
+        unsigned int i=0;
+        for (CvBlobs::const_iterator it = blobs.begin(); it!=blobs.end(); ++it, i++)
+        {
+            AB(i) = 0;
+            IB(i) = it->second->label;
+        }
 
-      CvID maxTrackID = 0;
+        CvID maxTrackID = 0;
 
-      unsigned int j=0;
-      for (CvTracks::const_iterator jt = tracks.begin(); jt!=tracks.end(); ++jt, j++)
-      {
-	AT(j) = 0;
-	IT(j) = jt->second->id;
-	if (jt->second->id > maxTrackID)
-	  maxTrackID = jt->second->id;
-      }
+        unsigned int j=0;
+        for (CvTracks::const_iterator jt = tracks.begin(); jt!=tracks.end(); ++jt, j++)
+        {
+            AT(j) = 0;
+            IT(j) = jt->second->id;
+            if (jt->second->id > maxTrackID)
+                maxTrackID = jt->second->id;
+            }
 
-      // Proximity matrix calculation and "used blob" list inicialization:
-      for (i=0; i<nBlobs; i++)
-	for (j=0; j<nTracks; j++)
-	  if (C(i, j) = (distantBlobTrack(B(i), T(j)) < thDistance))
-	  {
-	    AB(i)++;
-	    AT(j)++;
-	  }
+            // Proximity matrix calculation and "used blob" list initialization:
+            for (i=0; i<nBlobs; i++){
+                for (j=0; j<nTracks; j++){
+                    if (C(i, j) = (distantBlobTrack(B(i), T(j)) < thDistance))
+                    {
+                        AB(i)++;
+                        AT(j)++;
+                    }
+                }
+            }
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Detect inactive tracks
+            for (j=0; j<nTracks; j++)
+            {
+                unsigned int c = AT(j);
 
-      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      // Detect inactive tracks
-      for (j=0; j<nTracks; j++)
-      {
-	unsigned int c = AT(j);
+                if (c==0)
+                {
+                    //cout << "Inactive track: " << j << endl;
+                    // Inactive track.
+                    CvTrack *track = T(j);
+                    track->inactive++;
+                    track->label = 0;
+                }
+            }
 
-	if (c==0)
-	{
-	  //cout << "Inactive track: " << j << endl;
+            // Detect new tracks
+            for (i=0; i<nBlobs; i++)
+            {
+                unsigned int c = AB(i);
 
-	  // Inactive track.
-	  CvTrack *track = T(j);
-	  track->inactive++;
-	  track->label = 0;
-	}
-      }
+                if (c==0)
+                {
+                    //cout << "Blob (new track): " << maxTrackID+1 << endl;
+                    //cout << *B(i) << endl;
 
-      // Detect new tracks
-      for (i=0; i<nBlobs; i++)
-      {
-	unsigned int c = AB(i);
+                    // New track.
+                    maxTrackID++;
+                    CvBlob *blob = B(i);
+                    CvTrack *track = new CvTrack;
+                    track->id = maxTrackID;
+                    track->label = blob->label;
+                    track->minx = blob->minx;
+                    track->miny = blob->miny;
+                    track->maxx = blob->maxx;
+                    track->maxy = blob->maxy;
+                    track->centroid = blob->centroid;
+                    track->lifetime = 0;
+                    track->active = 0;
+                    track->inactive = 0;
+                    tracks.insert(CvIDTrack(maxTrackID, track));
+                }
+            }
 
-	if (c==0)
-	{
-	  //cout << "Blob (new track): " << maxTrackID+1 << endl;
-	  //cout << *B(i) << endl;
+            // Clustering
+            for (j=0; j<nTracks; j++)
+            {
+                unsigned int c = AT(j);
 
-	  // New track.
-	  maxTrackID++;
-	  CvBlob *blob = B(i);
-	  CvTrack *track = new CvTrack;
-	  track->id = maxTrackID;
-	  track->label = blob->label;
-	  track->minx = blob->minx;
-	  track->miny = blob->miny;
-	  track->maxx = blob->maxx;
-	  track->maxy = blob->maxy;
-	  track->centroid = blob->centroid;
-	  track->lifetime = 0;
-	  track->active = 0;
-	  track->inactive = 0;
-	  tracks.insert(CvIDTrack(maxTrackID, track));
-	}
-      }
+                if (c)
+                {
+                    list<CvTrack*> tt; tt.push_back(T(j));
+                    list<CvBlob*> bb;
 
-      // Clustering
-      for (j=0; j<nTracks; j++)
-      {
-	unsigned int c = AT(j);
+                    getClusterForTrack(j, close, nBlobs, nTracks, blobs, tracks, bb, tt);
 
-	if (c)
-	{
-	  list<CvTrack*> tt; tt.push_back(T(j));
-	  list<CvBlob*> bb;
+                    // Select track
+                    CvTrack *track;
+                    unsigned int area = 0;
+                    for (list<CvTrack*>::const_iterator it=tt.begin(); it!=tt.end(); ++it)
+                    {
+                        CvTrack *t = *it;
 
-	  getClusterForTrack(j, close, nBlobs, nTracks, blobs, tracks, bb, tt);
+                        unsigned int a = (t->maxx-t->minx)*(t->maxy-t->miny);
+                        if (a>area)
+                        {
+                            area = a;
+                            track = t;
+                        }
+                    }
 
-	  // Select track
-	  CvTrack *track;
-	  unsigned int area = 0;
-	  for (list<CvTrack*>::const_iterator it=tt.begin(); it!=tt.end(); ++it)
-	  {
-	    CvTrack *t = *it;
+                    // Select blob
+                    CvBlob *blob;
+                    area = 0;
+                    //cout << "Matching blobs: ";
+                    for (list<CvBlob*>::const_iterator it=bb.begin(); it!=bb.end(); ++it)
+                    {
+                        CvBlob *b = *it;
 
-	    unsigned int a = (t->maxx-t->minx)*(t->maxy-t->miny);
-	    if (a>area)
-	    {
-	      area = a;
-	      track = t;
-	    }
-	  }
+                        //cout << b->label << " ";
 
-	  // Select blob
-	  CvBlob *blob;
-	  area = 0;
-	  //cout << "Matching blobs: ";
-	  for (list<CvBlob*>::const_iterator it=bb.begin(); it!=bb.end(); ++it)
-	  {
-	    CvBlob *b = *it;
+                        if (b->area>area)
+                        {
+                            area = b->area;
+                            blob = b;
+                        }
+                    }
+                    //cout << endl;
 
-	    //cout << b->label << " ";
+                    // Update track
+                    //cout << "Matching: track=" << track->id << ", blob=" << blob->label << endl;
+                    track->label = blob->label;
+                    track->centroid = blob->centroid;
+                    track->minx = blob->minx;
+                    track->miny = blob->miny;
+                    track->maxx = blob->maxx;
+                    track->maxy = blob->maxy;
+                    if (track->inactive){
+                        track->active = 0;
+                    }
+                    track->inactive = 0;
 
-	    if (b->area>area)
-	    {
-	      area = b->area;
-	      blob = b;
-	    }
-	  }
-	  //cout << endl;
+                    // Others to inactive
+                    for (list<CvTrack*>::const_iterator it=tt.begin(); it!=tt.end(); ++it)
+                    {
+                        CvTrack *t = *it;
 
-	  // Update track
-	  //cout << "Matching: track=" << track->id << ", blob=" << blob->label << endl;
-	  track->label = blob->label;
-	  track->centroid = blob->centroid;
-	  track->minx = blob->minx;
-	  track->miny = blob->miny;
-	  track->maxx = blob->maxx;
-	  track->maxy = blob->maxy;
-	  if (track->inactive)
-	    track->active = 0;
-	  track->inactive = 0;
+                        if (t!=track)
+                        {
+                            //cout << "Inactive: track=" << t->id << endl;
+                            t->inactive++;
+                            t->label = 0;
+                        }
+                    }
+                }
+            }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	  // Others to inactive
-	  for (list<CvTrack*>::const_iterator it=tt.begin(); it!=tt.end(); ++it)
-	  {
-	    CvTrack *t = *it;
-
-	    if (t!=track)
-	    {
-	      //cout << "Inactive: track=" << t->id << endl;
-	      t->inactive++;
-	      t->label = 0;
-	    }
-	  }
-	}
-      }
-      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      for (CvTracks::iterator jt=tracks.begin(); jt!=tracks.end();)
-	if ((jt->second->inactive>=thInactive)||((jt->second->inactive)&&(thActive)&&(jt->second->active<thActive)))
-	{
-	  delete jt->second;
-	  tracks.erase(jt++);
-	}
-	else
-	{
-	  jt->second->lifetime++;
-	  if (!jt->second->inactive)
-	    jt->second->active++;
-	  ++jt;
-	}
+            for (CvTracks::iterator jt=tracks.begin(); jt!=tracks.end();)
+            {
+                if ((jt->second->inactive>=thInactive)||((jt->second->inactive)&&(thActive)&&(jt->second->active<thActive)))
+                {
+                    delete jt->second;
+                    tracks.erase(jt++);
+                }
+                else
+                {
+                    jt->second->lifetime++;
+                    if (!jt->second->inactive){
+                        jt->second->active++;
+                    }
+                    ++jt;
+                }
+            }
     }
     catch (...)
     {
-      delete[] close;
-      throw; // TODO: OpenCV style.
+        delete[] close;
+        throw; // TODO: OpenCV style.
     }
 
     delete[] close;
 
     __CV_END__;
-  }
+}
 
   CvFont *defaultFont = NULL;
 
-  void cvRenderTracks(CvTracks const tracks, IplImage *imgSource, IplImage *imgDest, unsigned short mode, CvFont *font)
-  {
+void cvRenderTracks(CvTracks const tracks, IplImage *imgSource, IplImage *imgDest, unsigned short mode, CvFont *font)
+{
     CV_FUNCNAME("cvRenderTracks");
     __CV_BEGIN__;
 

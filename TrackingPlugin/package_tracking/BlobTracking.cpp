@@ -85,11 +85,24 @@ void BlobTracking::process(const cv::Mat &img_input, const cv::Mat &img_mask, cv
 
   cvb::cvUpdateTracks(blobs, tracks, 200., 5);
   
+    unsigned int j=0;
+    for (cvb::CvTracks::const_iterator track = tracks.begin(); track!=tracks.end(); ++track, j++)
+    {
+        if((*track).second->active != 0){
+
+            std::cout  << "Active track: " << (*track).first << "\n";
+        }
+
+    }
+
+
+
   if(debugTrack)
     cvb::cvRenderTracks(tracks, frame, frame, CV_TRACK_RENDER_ID|CV_TRACK_RENDER_BOUNDING_BOX|CV_TRACK_RENDER_TO_STD);
   else
     cvb::cvRenderTracks(tracks, frame, frame, CV_TRACK_RENDER_ID|CV_TRACK_RENDER_BOUNDING_BOX);
   
+
   //std::map<CvID, CvTrack *> CvTracks
 
   //if(showOutput)
