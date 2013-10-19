@@ -118,7 +118,12 @@ void BlobTracking::process(const cv::Mat &img_input, const cv::Mat &img_mask, cv
    // cvShowImage("Blob Tracking", frame);
 
   cv::Mat img_result(frame);
+
+  cv::putText(img_result,QString("%1").arg(QString::number(frameIndex)).toUtf8().constData(), cv::Point(10,30), CV_FONT_HERSHEY_PLAIN,1.0, CV_RGB(255,255,255));
+
   img_result.copyTo(img_output);
+
+
 
   //cvReleaseImage(&frame);
   //cvReleaseImage(&segmentated);
