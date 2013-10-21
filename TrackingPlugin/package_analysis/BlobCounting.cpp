@@ -118,7 +118,7 @@ void BlobCounting::process()
   img_w = img_input.size().width;
   img_h = img_input.size().height;
 
-  //loadConfig();
+  loadConfig();
 
   //--------------------------------------------------------------------------
 
@@ -198,7 +198,7 @@ void BlobCounting::process()
     //std::cout << "track->lifetime:" << track->lifetime << std::endl;
     
 
-	//qDebug() << "Test";
+    //qDebug() << "Test";
 	out_stream << "[" << frameIndex << "] [" << track->id << "] (" << "," << ")\n";
 				 
     //----------------------------------------------------------------------------
@@ -284,7 +284,7 @@ void BlobCounting::process()
 
   if(showAB == 0)
   {
-	sprintf(string,"A->B:%d",countAB);
+    sprintf(string,"A->B:%d",countAB);
    cv::putText(img_input, string, cv::Point(10,img_h-20), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255,255,255));
    sprintf(string,"B->A:%d",countBA);
    cv::putText(img_input, string, cv::Point(10,img_h-8), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255,255,255));
@@ -302,45 +302,58 @@ void BlobCounting::process()
   if(showOutput)
     cv::imshow("Blob Counting", img_input);
 
-  //if(firstTime)
-  //  saveConfig();
+  if(firstTime)
+    saveConfig();
 
   frameIndex++;
   firstTime = false;
-  
-	
+
+
 }
 
 void BlobCounting::saveConfig()
 {
-  CvFileStorage* fs = cvOpenFileStorage("./config/BlobCounting.xml", 0, CV_STORAGE_WRITE);
+    QDir dir(QCoreApplication::instance()->applicationDirPath());
+    dir.cd("config");
 
-  cvWriteInt(fs, "showOutput", showOutput);
-  cvWriteInt(fs, "showAB", showAB);
-  
-  cvWriteInt(fs, "fav1_use_roi", FAV1::use_roi);
-  cvWriteInt(fs, "fav1_roi_defined", FAV1::roi_defined);
-  cvWriteInt(fs, "fav1_roi_x0", FAV1::roi_x0);
-  cvWriteInt(fs, "fav1_roi_y0", FAV1::roi_y0);
-  cvWriteInt(fs, "fav1_roi_x1", FAV1::roi_x1);
-  cvWriteInt(fs, "fav1_roi_y1", FAV1::roi_y1);
-  
-  cvReleaseFileStorage(&fs);
+    CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("blobcountingconfig.xml").toLocal8Bit(), 0, CV_STORAGE_WRITE);
+
+    if(fs == NULL){
+      return;
+    }
+
+    cvWriteInt(fs, "showOutput", showOutput);
+    cvWriteInt(fs, "showAB", showAB);
+
+    cvWriteInt(fs, "fav1_use_roi", FAV1::use_roi);
+    cvWriteInt(fs, "fav1_roi_defined", FAV1::roi_defined);
+    cvWriteInt(fs, "fav1_roi_x0", FAV1::roi_x0);
+    cvWriteInt(fs, "fav1_roi_y0", FAV1::roi_y0);
+    cvWriteInt(fs, "fav1_roi_x1", FAV1::roi_x1);
+    cvWriteInt(fs, "fav1_roi_y1", FAV1::roi_y1);
+
+    cvReleaseFileStorage(&fs);
 }
 
 void BlobCounting::loadConfig()
 {
-  CvFileStorage* fs = cvOpenFileStorage("./config/BlobCounting.xml", 0, CV_STORAGE_READ);
+    QDir dir(QCoreApplication::instance()->applicationDirPath());
+    dir.cd("config");
 
-  showOutput = cvReadIntByName(fs, 0, "showOutput", true);
-  showAB = cvReadIntByName(fs, 0, "showAB", 1);
-  
-  FAV1::use_roi = cvReadIntByName(fs, 0, "fav1_use_roi", true);
-  FAV1::roi_defined = cvReadIntByName(fs, 0, "fav1_roi_defined", true);
-  FAV1::roi_x0 = cvReadIntByName(fs, 0, "fav1_roi_x0", 0);
-  FAV1::roi_y0 = cvReadIntByName(fs, 0, "fav1_roi_y0", 0);
-  FAV1::roi_x1 = cvReadIntByName(fs, 0, "fav1_roi_x1", 0);
-  FAV1::roi_y1 = cvReadIntByName(fs, 0, "fav1_roi_y1", 0);
-  
-  cvReleaseFileStorage(&fs);
+    CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("blobcountingconfig.xml").toLocal8Bit(), 0, CV_STORAGE_READ);
+
+    if(fs == NULL){
+      return;
+    }
+    showOutput = cvReadIntByName(fs, 0, "showOutput", false);
+    showAB = cvReadIntByName(fs, 0, "showAB", 1);
+
+    FAV1::use_roi = cvReadIntByName(fs, 0, "fav1_use_roi", true);
+    FAV1::roi_defined = cvReadIntByName(fs, 0, "fav1_roi_defined", true);
+    FAV1::roi_x0 = cvReadIntByName(fs, 0, "fav1_roi_x0", 0);
+    FAV1::roi_y0 = cvReadIntByName(fs, 0, "fav1_roi_y0", 0);
+    FAV1::roi_x1 = cvReadIntByName(fs, 0, "fav1_roi_x1", 0);
+    FAV1::roi_y1 = cvReadIntByName(fs, 0, "fav1_roi_y1", 0);
+
+    cvReleaseFileStorage(&fs);
 }

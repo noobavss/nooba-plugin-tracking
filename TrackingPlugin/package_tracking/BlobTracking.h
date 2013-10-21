@@ -9,6 +9,8 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QCoreApplication>
+#include <QDir>
 
 class BlobTracking
 {

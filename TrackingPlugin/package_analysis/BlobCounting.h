@@ -7,6 +7,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <QFile>
 #include <QTextStream>
+#include <QCoreApplication>
+#include <QDir>
 
 #include "../package_tracking/cvblob/cvblob.h"
 

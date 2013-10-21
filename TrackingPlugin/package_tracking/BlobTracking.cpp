@@ -139,27 +139,36 @@ void BlobTracking::process(const cv::Mat &img_input, const cv::Mat &img_mask, cv
 
 void BlobTracking::saveConfig()
 {
-  CvFileStorage* fs = cvOpenFileStorage("configuration//BlobTrackingTest.xml", 0, CV_STORAGE_WRITE);
 
-  if(fs == NULL){
-	  return;
-  }
-  cvWriteInt(fs, "minArea", minArea);
-  cvWriteInt(fs, "maxArea", maxArea);
-  
-  cvWriteInt(fs, "debugTrack", debugTrack);
-  cvWriteInt(fs, "debugBlob", debugBlob);
-  cvWriteInt(fs, "showBlobMask", showBlobMask);
-  cvWriteInt(fs, "showOutput", showOutput);
+    QDir dir(QCoreApplication::instance()->applicationDirPath());
+    dir.cd("config");
 
-  cvReleaseFileStorage(&fs);
+    CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("blobtrackingconfig.xml").toLocal8Bit(), 0, CV_STORAGE_WRITE);
+
+    if(fs == NULL){
+      return;
+    }
+    cvWriteInt(fs, "minArea", minArea);
+    cvWriteInt(fs, "maxArea", maxArea);
+
+    cvWriteInt(fs, "debugTrack", debugTrack);
+    cvWriteInt(fs, "debugBlob", debugBlob);
+    cvWriteInt(fs, "showBlobMask", showBlobMask);
+    cvWriteInt(fs, "showOutput", showOutput);
+
+    cvReleaseFileStorage(&fs);
 }
 
 void BlobTracking::loadConfig()
 {
-  CvFileStorage* fs = cvOpenFileStorage("configuration//BlobTrackingTest.xml", 0, CV_STORAGE_READ);
+    QDir dir(QCoreApplication::instance()->applicationDirPath());
+    dir.cd("config");
+
+    CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("blobtrackingconfig.xml").toLocal8Bit(), 0, CV_STORAGE_READ);
   
   if(fs = NULL){
+
+      std::cout << "Error opening file";
 		minArea		= 100;
 		maxArea		= 20000;
 		debugTrack	= false;
@@ -174,7 +183,7 @@ void BlobTracking::loadConfig()
   debugTrack	= cvReadIntByName(fs, 0, "debugTrack", false);
   debugBlob		= cvReadIntByName(fs, 0, "debugBlob", false);
   showBlobMask	= cvReadIntByName(fs, 0, "showBlobMask", false);
-  showOutput	= cvReadIntByName(fs, 0, "showOutput", true);
+  showOutput	= cvReadIntByName(fs, 0, "showOutput", false);
 
   cvReleaseFileStorage(&fs);
 }
