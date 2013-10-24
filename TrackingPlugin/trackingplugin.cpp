@@ -28,6 +28,12 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
 
     // bgs->process(...) method internally shows the foreground mask image
     bgs.process(in, img_mask);
+
+    cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2,2));
+    cv::dilate(img_mask,img_mask, element,cv::Point(-1,-1),1);
+    cv::erode(img_mask,img_mask, element,cv::Point(-1,-1),2);
+
+    //cv::imshow("BGS",img_mask);
     blobTracking.process(in, img_mask, img_blob);
 
     cv::cvtColor(img_blob, out, CV_BGR2GRAY);
@@ -44,9 +50,10 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
 
 bool TrackingPlugin::init()
 {
-    output_location = "/home/chathuranga/Programming/FYP/data/text/2013-10-13-blob_centroids.txt";
+    output_location = "/home/chathuranga/Programming/FYP/data/text/2013-10-24-sample-blobs.txt";
     createStringParam("output_location",output_location,false);
     blobTracking.setOutputFile(output_location);
+    debugMsg("TrackingPlugin initialized");
     return true;
 }
 

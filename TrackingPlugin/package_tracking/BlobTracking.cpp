@@ -21,8 +21,8 @@ void BlobTracking::setOutputFile(QString output_location)
     file.close();
     file.setFileName(output_location);
 
-  std::cout << "Opening Output File" << std::endl;
-  if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    std::cout << "Opening Output File" << std::endl;
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return;
 }
 
@@ -70,7 +70,7 @@ void BlobTracking::process(const cv::Mat &img_input, const cv::Mat &img_mask, cv
         cvb::cvRenderBlobs(labelImg, blobs, frame, frame, CV_BLOB_RENDER_BOUNDING_BOX|CV_BLOB_RENDER_CENTROID|CV_BLOB_RENDER_ANGLE);
     }
 
-    cvb::cvUpdateTracks(blobs, tracks, 20.0, 5);
+    cvb::cvUpdateTracks(blobs, tracks, 100.0, 10);
 
     QTextStream out_stream(&file);
 
