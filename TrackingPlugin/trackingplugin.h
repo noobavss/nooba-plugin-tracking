@@ -45,6 +45,8 @@ private:
     BlobTrackingNode blobTrackingNode;
     FileWriterNode blobEventWriterNode;
 
+    QList<PluginPassData> eventQueue;
+
 
 
 };
