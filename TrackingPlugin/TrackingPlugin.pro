@@ -19,12 +19,14 @@ DEFINES += TRACKINGPLUGIN_LIB
 # Input
 HEADERS += trackingplugin.h trackingplugin_global.h \
     package_bgs/StaticFrameDifferenceBGS.h \
-    package_tracking/BlobTracking.h \
     package_bgs/IBGS.h \
     package_analysis/BlobCounting.h \
-    package_tracking/cvblob/cvblob.h
+    package_tracking/cvblob/cvblob.h \
+    detectedevent.h \
+    featurenode.h \
+    package_tracking/BlobTrackingNode.h \
+    filewriternode.h
 SOURCES += trackingplugin.cpp \
-    package_tracking/BlobTracking.cpp \
     package_bgs/StaticFrameDifferenceBGS.cpp \
     package_analysis/BlobCounting.cpp \
     package_tracking/cvblob/cvtrack.cpp \
@@ -32,7 +34,11 @@ SOURCES += trackingplugin.cpp \
     package_tracking/cvblob/cvcontour.cpp \
     package_tracking/cvblob/cvcolor.cpp \
     package_tracking/cvblob/cvblob.cpp \
-    package_tracking/cvblob/cvaux.cpp
+    package_tracking/cvblob/cvaux.cpp \
+    featurenode.cpp \
+    detecedevent.cpp \
+    package_tracking/BlobTrackingNode.cpp \
+    filewriternode.cpp
 
 CONFIG(debug, debug|release): DESTDIR = $$PWD/../../../NoobaVSS_build/NoobaFE/Debug/plugins/
 CONFIG(release, debug|release): DESTDIR = $$PWD/../../../NoobaVSS_build/NoobaFE/Release/plugins/

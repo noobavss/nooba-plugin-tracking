@@ -12,6 +12,9 @@
 TrackingPlugin::TrackingPlugin()
 {
 
+    connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>)), this, SLOT(onCaptureEvent(QList<DetectedEvent>)));
+    connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>)), &blobEventWriterNode, SLOT(captureEvent(QList<DetectedEvent>)));
+
 
 }
 
@@ -34,7 +37,7 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
     cv::erode(img_mask,img_mask, element,cv::Point(-1,-1),2);
 
     //cv::imshow("BGS",img_mask);
-    blobTracking.process(in, img_mask, img_blob);
+    blobTrackingNode.process(in, img_mask, img_blob);
 
     cv::cvtColor(img_blob, out, CV_BGR2GRAY);
 
@@ -42,7 +45,7 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
     //cv::imshow("blob", img_blob);
     // Perform blob counting
     blobCounting.setInput(img_blob);
-    blobCounting.setTracks(blobTracking.getTracks());
+    blobCounting.setTracks(blobTrackingNode.getTracks());
     blobCounting.process();
 
     return true;
@@ -50,9 +53,10 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
 
 bool TrackingPlugin::init()
 {
-    output_location = "/home/chathuranga/Programming/FYP/data/text/2013-10-24-sample-blobs.txt";
-    createStringParam("output_location",output_location,false);
-    blobTracking.setOutputFile(output_location);
+    output_file = "/home/chathuranga/Programming/FYP/data/text/2013-10-28-sample-blobs.txt";
+    //createStringParam("output_location",output_location,false);
+
+    blobEventWriterNode.openFile(output_file);
     debugMsg("TrackingPlugin initialized");
     return true;
 }
@@ -76,11 +80,18 @@ PluginInfo TrackingPlugin::getPluginInfo() const
 void TrackingPlugin:: onStringParamChanged(const QString& varName, const QString& val){
     if(varName == "output_location"){
         setProperty("output_location",val);
-        blobTracking.setOutputFile(output_location);
+        //blobTracking.setOutputFile(output_location);
         debugMsg("output_location set to "  + val);
     }
 }
 
+void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event){
+
+    foreach(DetectedEvent e, captured_event){
+        debugMsg(QString("xxxxxxxxx" + e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
+    }
+
+}
 
 // see qt4 documentation for details on the macro (Qt Assistant app)
 // Mandatory  macro for plugins in qt4. Made obsolete in qt5
