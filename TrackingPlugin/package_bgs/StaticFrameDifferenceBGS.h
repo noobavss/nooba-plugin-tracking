@@ -5,6 +5,7 @@
 #include <opencv/highgui.h>
 
 #include "IBGS.h"
+#include "QDir"
 
 class StaticFrameDifferenceBGS : public IBGS
 {

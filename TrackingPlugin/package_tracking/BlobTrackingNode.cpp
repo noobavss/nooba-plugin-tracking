@@ -49,9 +49,9 @@ void BlobTrackingNode::process(const cv::Mat &img_input, const cv::Mat &img_mask
     IplConvKernel* morphKernel = cvCreateStructuringElementEx(5, 5, 1, 1, CV_SHAPE_RECT, NULL);
     cvMorphologyEx(segmentated, segmentated, NULL, morphKernel, CV_MOP_OPEN, 1);
 
-    if(showBlobMask){
+    //if(showBlobMask){
         cvShowImage("Blob Mask", segmentated);
-    }
+    //}
     IplImage* labelImg = cvCreateImage(cvGetSize(frame), IPL_DEPTH_LABEL, 1);
 
     cvb::CvBlobs blobs;
@@ -120,8 +120,16 @@ void BlobTrackingNode::process(const cv::Mat &img_input, const cv::Mat &img_mask
 void BlobTrackingNode::saveConfig()
 {
 
-    QDir dir(QCoreApplication::instance()->applicationDirPath());
+    QDir dir(QDir::home());
+    if(!dir.exists("NoobaVSS")){
+        dir.mkdir("NoobaVSS");
+    }
+    dir.cd("NoobaVSS");
+    if(!dir.exists("config")){
+        dir.mkdir("config");
+    }
     dir.cd("config");
+
 
     CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("blobtrackingconfig.xml").toLocal8Bit(), 0, CV_STORAGE_WRITE);
 
@@ -141,7 +149,14 @@ void BlobTrackingNode::saveConfig()
 
 void BlobTrackingNode::loadConfig()
 {
-    QDir dir(QCoreApplication::instance()->applicationDirPath());
+    QDir dir(QDir::home());
+    if(!dir.exists("NoobaVSS")){
+        dir.mkdir("NoobaVSS");
+    }
+    dir.cd("NoobaVSS");
+    if(!dir.exists("config")){
+        dir.mkdir("config");
+    }
     dir.cd("config");
 
     CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("blobtrackingconfig.xml").toLocal8Bit(), 0, CV_STORAGE_READ);

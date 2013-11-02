@@ -20,8 +20,8 @@ void StaticFrameDifferenceBGS::process(const cv::Mat &img_input, cv::Mat &img_ou
   
   loadConfig();
 
-  //if(firstTime)
-  //  saveConfig();
+  if(firstTime)
+    saveConfig();
 
   cv::absdiff(img_input, img_background, img_foreground);
 
@@ -47,7 +47,17 @@ void StaticFrameDifferenceBGS::process(const cv::Mat &img_input, cv::Mat &img_ou
 
 void StaticFrameDifferenceBGS::saveConfig()
 {
-  CvFileStorage* fs = cvOpenFileStorage("./config/StaticFrameDifferenceBGS.xml", 0, CV_STORAGE_WRITE);
+    QDir dir(QDir::home());
+    if(!dir.exists("NoobaVSS")){
+        dir.mkdir("NoobaVSS");
+    }
+    dir.cd("NoobaVSS");
+    if(!dir.exists("config")){
+        dir.mkdir("config");
+    }
+    dir.cd("config");
+
+  CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("StaticFrameDifferenceBGS.xml").toLocal8Bit(), 0, CV_STORAGE_WRITE);
 
   cvWriteInt(fs, "enableThreshold", enableThreshold);
   cvWriteInt(fs, "threshold", threshold);
@@ -58,11 +68,21 @@ void StaticFrameDifferenceBGS::saveConfig()
 
 void StaticFrameDifferenceBGS::loadConfig()
 {
-  CvFileStorage* fs = cvOpenFileStorage("./config/StaticFrameDifferenceBGS.xml", 0, CV_STORAGE_READ);
-  
-  enableThreshold = cvReadIntByName(fs, 0, "enableThreshold", true);
-  threshold = cvReadIntByName(fs, 0, "threshold", 15);
-  showOutput = cvReadIntByName(fs, 0, "showOutput", false);
 
-  cvReleaseFileStorage(&fs);
+    QDir dir(QDir::home());
+    if(!dir.exists("NoobaVSS")){
+        dir.mkdir("NoobaVSS");
+    }
+    dir.cd("NoobaVSS");
+    if(!dir.exists("config")){
+        dir.mkdir("config");
+    }
+    dir.cd("config");
+    CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("StaticFrameDifferenceBGS.xml").toLocal8Bit(), 0, CV_STORAGE_READ);
+
+    enableThreshold = cvReadIntByName(fs, 0, "enableThreshold", true);
+    threshold = cvReadIntByName(fs, 0, "threshold", 15);
+    showOutput = cvReadIntByName(fs, 0, "showOutput", false);
+
+    cvReleaseFileStorage(&fs);
 }

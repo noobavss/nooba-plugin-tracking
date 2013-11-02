@@ -33,7 +33,9 @@ public:
     PluginInfo getPluginInfo() const;
 public slots:
     void onStringParamChanged(const QString& varName, const QString& val);
-
+    void onIntParamChanged(const QString &varName, int val);
+    void onDoubleParamChanged(const QString &varName, double val);
+    void onMultiValParamChanged(const QString &varName, const QString &val);
     void onCaptureEvent(QList<DetectedEvent> captured_event);
 
 private:
@@ -44,10 +46,6 @@ private:
     BlobCounting blobCounting;
     BlobTrackingNode blobTrackingNode;
     FileWriterNode blobEventWriterNode;
-
-    QList<PluginPassData> eventQueue;
-
-
 
 };
 

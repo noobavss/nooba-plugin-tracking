@@ -337,11 +337,19 @@ void BlobCounting::saveConfig()
 
 void BlobCounting::loadConfig()
 {
-    QDir dir(QCoreApplication::instance()->applicationDirPath());
+
+    QDir dir(QDir::home());
+    if(!dir.exists("NoobaVSS")){
+        dir.mkdir("NoobaVSS");
+    }
+    dir.cd("NoobaVSS");
+    if(!dir.exists("config")){
+        dir.mkdir("config");
+    }
     dir.cd("config");
 
-    CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("blobcountingconfig.xml").toLocal8Bit(), 0, CV_STORAGE_READ);
 
+    CvFileStorage* fs = cvOpenFileStorage(dir.absoluteFilePath("blobcountingconfig.xml").toLocal8Bit(), 0, CV_STORAGE_WRITE);
     if(fs == NULL){
       return;
     }

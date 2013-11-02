@@ -51,10 +51,41 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
 
 bool TrackingPlugin::init()
 {
-    output_file = "/home/chathuranga/Programming/FYP/data/text/2013-10-28-sample-blobs.txt";
+    QDateTime timestamp = QDateTime::currentDateTime();
+    QStringList enable_disable_list;
+
+    enable_disable_list.append("Enable");
+    enable_disable_list.append("Disable");
+
+    QDir dir(QDir::home());
+    if(!dir.exists("NoobaVSS")){
+        dir.mkdir("NoobaVSS");
+    }
+    dir.cd("NoobaVSS");
+    if(!dir.exists("data")){
+        dir.mkdir("data");
+    }
+    dir.cd("data");
+    if(!dir.exists("text")){
+        dir.mkdir("text");
+    }
+    dir.cd("text");
+
+
+
+    output_file = dir.absoluteFilePath(timestamp.currentDateTime().toString("yyyy-MM-dd-hhmm") + "-blobs.txt").toLocal8Bit();
     createStringParam("output_file",output_file,false);
+    createIntParam("inactive_time",10,1000,0);
+    createDoubleParam("distance_threshold",100.0,1000.0,1.0);
+    createIntParam("min_area",100,100000,0);
+    createIntParam("max_area",20000,100000,0);
+
+    //createMultiValParam("enable_file_output",enable_disable_list);
+    createMultiValParam("show_blob_mask",enable_disable_list);
 
     blobEventWriterNode.openFile(output_file);
+    blobTrackingNode.setInactiveTimeThreshold(10);
+    blobTrackingNode.setDistanceThreshold(100.0);
     debugMsg("TrackingPlugin initialized");
     return true;
 }
@@ -77,28 +108,69 @@ PluginInfo TrackingPlugin::getPluginInfo() const
 
 void TrackingPlugin:: onStringParamChanged(const QString& varName, const QString& val){
     if(varName == "output_file"){
-        setProperty("output_location",val);
         output_file = val;
         blobEventWriterNode.openFile(output_file);
-
         debugMsg("output_file set to "  + val);
+    }
+}
+
+void TrackingPlugin::onIntParamChanged(const QString &varName, int val){
+    if(varName == "inactive_time"){
+
+        blobTrackingNode.setInactiveTimeThreshold(val);
+        debugMsg("inactive_time set to "  + QString("%1").arg(val));
+    }
+    else if(varName == "min_area"){
+
+        blobTrackingNode.setMinArea(val);
+        debugMsg("min_area set to "  + QString("%1").arg(val));
+    }
+    else if(varName == "max_area"){
+
+        blobTrackingNode.setMaxArea(val);
+        debugMsg("max_area set to "  + QString("%1").arg(val));
+    }
+
+}
+
+void TrackingPlugin::onDoubleParamChanged(const QString &varName, double val){
+
+    if(varName == "distance_threshold"){
+            blobTrackingNode.setDistanceThreshold(val);
+            debugMsg("distance_threshold set to "  + QString("%1").arg(val));
+    }
+}
+
+void TrackingPlugin::onMultiValParamChanged(const QString &varName, const QString &val){
+    if(varName == "enable_file_output"){
+
+            debugMsg("enable_file_output set to " + val);
+    }
+    else if(varName == "show_blob_mask"){
+        if(val == "Enable"){
+        blobTrackingNode.toggleBlobMaskOutput(true);
+        }
+        else{
+            blobTrackingNode.toggleBlobMaskOutput(false);
+        }
+        debugMsg("show_blob_mask set to " + val);
     }
 }
 
 void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event){
 
     PluginPassData eventData;
-
     foreach(DetectedEvent e, captured_event){
         //debugMsg(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
         eventData.appendStrList(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
     }
     //out_stream << frameIndex << "," << (*track).first << ","<< blob->centroid.x << "," << blob->centroid.y << "|";
 
-    //eventQueue.append(event);
-    outputDataRequest(&eventData);
+    outputData(eventData);
+    //outputDataRequest(eventData);
 
 }
+
 
 // see qt4 documentation for details on the macro (Qt Assistant app)
 // Mandatory  macro for plugins in qt4. Made obsolete in qt5
