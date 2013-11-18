@@ -10,10 +10,10 @@
 #include <featurenode.h>
 
 #include "package_bgs/StaticFrameDifferenceBGS.h"
+#include "package_bgs/MixtureOfGaussianV2BGS.h"
 #include "package_tracking/BlobTrackingNode.h"
 #include "filewriternode.h"
 
-#include "package_analysis/BlobCounting.h"
 
 class TRACKINGPLUGIN_EXPORT TrackingPlugin: public NoobaPluginAPI
 {
@@ -37,15 +37,20 @@ public slots:
     void onDoubleParamChanged(const QString &varName, double val);
     void onMultiValParamChanged(const QString &varName, const QString &val);
     void onCaptureEvent(QList<DetectedEvent> captured_event);
+    void onCaptureEvent(QList<DetectedEvent> captured_event,QImage image);
 
 private:
     QString output_file;
+    QString background_subtractor;
     cv::Mat img_blob;
     cv::Mat img_mask;
-    StaticFrameDifferenceBGS bgs;
-    BlobCounting blobCounting;
+    StaticFrameDifferenceBGS staticBGS;
+    MixtureOfGaussianV2BGS mogBGS;
     BlobTrackingNode blobTrackingNode;
     FileWriterNode blobEventWriterNode;
+
+
+
 
 };
 

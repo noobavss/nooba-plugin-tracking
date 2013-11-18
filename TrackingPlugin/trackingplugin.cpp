@@ -1,6 +1,5 @@
 #include "trackingplugin.h"
 #include <QtCore>
-#include <opencv2/core/core.hpp>
 
 // opencv includes
 #include <opencv2/core/core.hpp>
@@ -8,11 +7,13 @@
 #include <opencv2/features2d/features2d.hpp>
 
 #include <QDebug>
+#include <QImage>
 
 TrackingPlugin::TrackingPlugin()
 {
+    connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>,QImage)), this, SLOT(onCaptureEvent(QList<DetectedEvent>,QImage)));
 
-    connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>)), this, SLOT(onCaptureEvent(QList<DetectedEvent>)));
+    //connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>)), this, SLOT(onCaptureEvent(QList<DetectedEvent>)));
     connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>)), &blobEventWriterNode, SLOT(captureEvent(QList<DetectedEvent>)));
 
 }
@@ -24,12 +25,20 @@ TrackingPlugin::~TrackingPlugin()
 
 bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &params )
 {
-
+    Q_UNUSED(params)
     img_mask = in.clone();
 
+    qDebug() << "Frame ID:" << params.frameId();
     // bgs->process(...) method internally shows the foreground mask image
-    bgs.process(in, img_mask);
 
+//    if(background_subtractor == "StaticFrameDifference"){
+//        staticBGS.process(in, img_mask);
+//    }else if(background_subtractor == "MixtureOfGaussianV2"){
+//        mogBGS.process(in, img_mask);
+//    }else{
+       // mogBGS.process(in, img_mask);
+        staticBGS.process(in, img_mask);
+//    }
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2,2));
     cv::dilate(img_mask,img_mask, element,cv::Point(-1,-1),1);
     cv::erode(img_mask,img_mask, element,cv::Point(-1,-1),2);
@@ -39,23 +48,21 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
 
     cv::cvtColor(img_blob, out, CV_BGR2GRAY);
 
-    //cv::imshow("mask", img_mask);
-    //cv::imshow("blob", img_blob);
-    // Perform blob counting
-    blobCounting.setInput(img_blob);
-    blobCounting.setTracks(blobTrackingNode.getTracks());
-    blobCounting.process();
-
     return true;
 }
 
 bool TrackingPlugin::init()
 {
+
     QDateTime timestamp = QDateTime::currentDateTime();
     QStringList enable_disable_list;
+    QStringList bgsList;
 
     enable_disable_list.append("Enable");
     enable_disable_list.append("Disable");
+
+    bgsList.append("StaticFrameDifference");
+    bgsList.append("MixtureOfGaussianV2");
 
     QDir dir(QDir::home());
     if(!dir.exists("NoobaVSS")){
@@ -71,8 +78,6 @@ bool TrackingPlugin::init()
     }
     dir.cd("text");
 
-
-
     output_file = dir.absoluteFilePath(timestamp.currentDateTime().toString("yyyy-MM-dd-hhmm") + "-blobs.txt").toLocal8Bit();
     createStringParam("output_file",output_file,false);
     createIntParam("inactive_time",10,1000,0);
@@ -81,11 +86,15 @@ bool TrackingPlugin::init()
     createIntParam("max_area",20000,100000,0);
 
     //createMultiValParam("enable_file_output",enable_disable_list);
-    createMultiValParam("show_blob_mask",enable_disable_list);
+    createMultiValParam("enable_file_output",enable_disable_list);
+
+    createMultiValParam("Background Subtractor",bgsList);
 
     blobEventWriterNode.openFile(output_file);
     blobTrackingNode.setInactiveTimeThreshold(10);
     blobTrackingNode.setDistanceThreshold(100.0);
+
+    background_subtractor = "StaticFrameDifference";
     debugMsg("TrackingPlugin initialized");
     return true;
 }
@@ -155,6 +164,18 @@ void TrackingPlugin::onMultiValParamChanged(const QString &varName, const QStrin
         }
         debugMsg("show_blob_mask set to " + val);
     }
+    else if(varName == "Background Subtractor"){
+        if(val == "StaticFrameDifference"){
+            background_subtractor = "StaticFrameDifference";
+        }
+        else if(val == "MixtureOfGaussianV2"){
+            background_subtractor = "MixtureOfGaussianV2";
+        }
+        else{
+            background_subtractor = "StaticFrameDifference";
+        }
+        debugMsg("Background Subtractor set to " + val);
+    }
 }
 
 void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event){
@@ -171,6 +192,20 @@ void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event){
 
 }
 
+void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event,QImage image){
+
+    Q_UNUSED(image);
+    PluginPassData eventData;
+    foreach(DetectedEvent e, captured_event){
+        //debugMsg(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
+        eventData.appendStrList(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
+    }
+    //out_stream << frameIndex << "," << (*track).first << ","<< blob->centroid.x << "," << blob->centroid.y << "|";
+
+    eventData.setImage(image);
+    outputData(eventData);
+
+}
 
 // see qt4 documentation for details on the macro (Qt Assistant app)
 // Mandatory  macro for plugins in qt4. Made obsolete in qt5

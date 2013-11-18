@@ -1,11 +1,12 @@
 #pragma once
 
 #include <iostream>
-#include <cv.h>
-#include <highgui.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 #include <opencv2/video/background_segm.hpp>
 
 #include "IBGS.h"
+#include "QDir"
 
 class MixtureOfGaussianV2BGS : public IBGS
 {

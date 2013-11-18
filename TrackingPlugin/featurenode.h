@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QImage>
 #include "detectedevent.h"
 
 class FeatureNode : public QObject
@@ -16,6 +17,8 @@ public slots:
     void captureEvent(QList<DetectedEvent> captured_event){ processEvents(captured_event);}
 signals:
     void generateEvent(QList<DetectedEvent> generated_event);
+    void generateEvent(QList<DetectedEvent> generated_event,QImage image);
+
 
 };
 

@@ -114,7 +114,11 @@ void BlobTrackingNode::process(const cv::Mat &img_input, const cv::Mat &img_mask
     firstTime = false;
     frameIndex++;
 
-    emit generateEvent(blobEvent);
+    QImage img((uchar*)img_output.data, img_output.cols, img_output.rows, img_output.step1(), QImage::Format_RGB888);
+
+    emit generateEvent(blobEvent,img);
+
+    //emit generateEvent(blobEvent);
 }
 
 void BlobTrackingNode::saveConfig()
@@ -181,6 +185,7 @@ void BlobTrackingNode::loadConfig()
 
     cvReleaseFileStorage(&fs);
 }
+
 
 void BlobTrackingNode::processEvents(const QList<DetectedEvent> event){
     //This is not suppose to recieve any event. Input is an image

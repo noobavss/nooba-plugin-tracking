@@ -1,10 +1,11 @@
 #pragma once
 
 #include <iostream>
-#include <cv.h>
-#include <highgui.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 
 #include "IBGS.h"
+#include "QDir"
 
 class AdaptiveBackgroundLearning : public IBGS
 {

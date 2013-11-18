@@ -14,6 +14,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QDebug>
+#include <QImage>
 
 class BlobTrackingNode : public FeatureNode
 {
