@@ -7,7 +7,7 @@ BlobTrackingNode::BlobTrackingNode(FeatureNode *parent) :
     maxArea(20000),
     debugTrack(false),
     debugBlob(false),
-    showBlobMask(false),
+    showBlobMask(true),
     showOutput(true),
     frameIndex(0),
     threshold_distance(100.0),
@@ -49,9 +49,11 @@ void BlobTrackingNode::process(const cv::Mat &img_input, const cv::Mat &img_mask
     IplConvKernel* morphKernel = cvCreateStructuringElementEx(5, 5, 1, 1, CV_SHAPE_RECT, NULL);
     cvMorphologyEx(segmentated, segmentated, NULL, morphKernel, CV_MOP_OPEN, 1);
 
-    //if(showBlobMask){
-        cvShowImage("Blob Mask", segmentated);
-    //}
+    cv::Mat temp = cv::Mat(segmentated);
+    if(showBlobMask){
+        //cv::imshow("test",temp);
+        ownerPlugin->updateFrameViewer("Tracking Mask",convertToQImage(temp));
+    }
     IplImage* labelImg = cvCreateImage(cvGetSize(frame), IPL_DEPTH_LABEL, 1);
 
     cvb::CvBlobs blobs;
@@ -98,7 +100,10 @@ void BlobTrackingNode::process(const cv::Mat &img_input, const cv::Mat &img_mask
     }
 
     if(showOutput){
-        cvShowImage("Blob Tracking", frame);
+        cv::Mat temp = cv::Mat(frame);
+        ownerPlugin->updateFrameViewer("Tracking Output",convertToQImage(temp));
+
+        //cvShowImage("Blob Tracking", frame);
     }
     cv::Mat img_result(frame);
 
@@ -180,10 +185,23 @@ void BlobTrackingNode::loadConfig()
 
     debugTrack	= cvReadIntByName(fs, 0, "debugTrack", false);
     debugBlob		= cvReadIntByName(fs, 0, "debugBlob", false);
-    showBlobMask	= cvReadIntByName(fs, 0, "showBlobMask", false);
-    showOutput	= cvReadIntByName(fs, 0, "showOutput", false);
+    showBlobMask	= cvReadIntByName(fs, 0, "showBlobMask", true);
+    showOutput	= cvReadIntByName(fs, 0, "showOutput", true);
 
     cvReleaseFileStorage(&fs);
+}
+
+
+QImage BlobTrackingNode::convertToQImage(cv::Mat &cvImg)
+{
+    if (cvImg.channels()== 1){
+        QImage img((uchar*)cvImg.data, cvImg.cols, cvImg.rows, cvImg.step1(), QImage::Format_Indexed8);
+        return img;
+    }
+    else{
+        QImage img((uchar*)cvImg.data, cvImg.cols, cvImg.rows, cvImg.step1(), QImage::Format_RGB888);
+        return img;
+    }
 }
 
 

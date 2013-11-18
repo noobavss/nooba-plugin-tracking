@@ -28,7 +28,7 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
     Q_UNUSED(params)
     img_mask = in.clone();
 
-    qDebug() << "Frame ID:" << params.frameId();
+   // qDebug() << "Frame ID:" << params.frameId();
     // bgs->process(...) method internally shows the foreground mask image
 
 //    if(background_subtractor == "StaticFrameDifference"){
@@ -46,7 +46,8 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
     //cv::imshow("BGS",img_mask);
     blobTrackingNode.process(in, img_mask, img_blob);
 
-    cv::cvtColor(img_blob, out, CV_BGR2GRAY);
+    in.copyTo(out);
+    //cv::cvtColor(img_blob, out, CV_BGR2GRAY);
 
     return true;
 }
@@ -87,14 +88,23 @@ bool TrackingPlugin::init()
 
     //createMultiValParam("enable_file_output",enable_disable_list);
     createMultiValParam("enable_file_output",enable_disable_list);
+    createMultiValParam("show_blob_mask",enable_disable_list);
+    createMultiValParam("show_blob_output",enable_disable_list);
 
     createMultiValParam("Background Subtractor",bgsList);
 
     blobEventWriterNode.openFile(output_file);
     blobTrackingNode.setInactiveTimeThreshold(10);
     blobTrackingNode.setDistanceThreshold(100.0);
+    blobTrackingNode.setParent(this);
+
 
     background_subtractor = "StaticFrameDifference";
+    blobTrackingNode.saveConfig();
+
+    createFrameViewer("Tracking Output");
+    createFrameViewer("Tracking Mask");
+
     debugMsg("TrackingPlugin initialized");
     return true;
 }
@@ -119,6 +129,8 @@ void TrackingPlugin:: onStringParamChanged(const QString& varName, const QString
     if(varName == "output_file"){
         output_file = val;
         blobEventWriterNode.openFile(output_file);
+        blobTrackingNode.saveConfig();
+
         debugMsg("output_file set to "  + val);
     }
 }
@@ -127,16 +139,20 @@ void TrackingPlugin::onIntParamChanged(const QString &varName, int val){
     if(varName == "inactive_time"){
 
         blobTrackingNode.setInactiveTimeThreshold(val);
+        blobTrackingNode.saveConfig();
+
         debugMsg("inactive_time set to "  + QString("%1").arg(val));
     }
     else if(varName == "min_area"){
 
         blobTrackingNode.setMinArea(val);
+        blobTrackingNode.saveConfig();
         debugMsg("min_area set to "  + QString("%1").arg(val));
     }
     else if(varName == "max_area"){
 
         blobTrackingNode.setMaxArea(val);
+        blobTrackingNode.saveConfig();
         debugMsg("max_area set to "  + QString("%1").arg(val));
     }
 
@@ -146,22 +162,38 @@ void TrackingPlugin::onDoubleParamChanged(const QString &varName, double val){
 
     if(varName == "distance_threshold"){
             blobTrackingNode.setDistanceThreshold(val);
+            blobTrackingNode.saveConfig();
+
             debugMsg("distance_threshold set to "  + QString("%1").arg(val));
     }
 }
 
 void TrackingPlugin::onMultiValParamChanged(const QString &varName, const QString &val){
     if(varName == "enable_file_output"){
-
             debugMsg("enable_file_output set to " + val);
     }
     else if(varName == "show_blob_mask"){
         if(val == "Enable"){
-        blobTrackingNode.toggleBlobMaskOutput(true);
+            blobTrackingNode.toggleBlobMaskOutput(true);
         }
         else{
             blobTrackingNode.toggleBlobMaskOutput(false);
+            cv::destroyWindow("Blob Mask");
         }
+        blobTrackingNode.saveConfig();
+
+        debugMsg("show_blob_mask set to " + val);
+    }
+    else if(varName == "show_blob_output"){
+        if(val == "Enable"){
+            blobTrackingNode.toggleShowOutput(true);
+        }
+        else{
+            blobTrackingNode.toggleShowOutput(false);
+            cv::destroyWindow("Blob Tracking");
+        }
+        blobTrackingNode.saveConfig();
+
         debugMsg("show_blob_mask set to " + val);
     }
     else if(varName == "Background Subtractor"){
@@ -174,6 +206,8 @@ void TrackingPlugin::onMultiValParamChanged(const QString &varName, const QStrin
         else{
             background_subtractor = "StaticFrameDifference";
         }
+        blobTrackingNode.saveConfig();
+
         debugMsg("Background Subtractor set to " + val);
     }
 }
@@ -206,6 +240,18 @@ void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event,QImage i
     outputData(eventData);
 
 }
+
+//void TrackingPlugin::inputData(const PluginPassData& data){
+
+//    QList<DetectedEvent> receivedEvents;
+//    foreach(QString str,data.strList()){
+//        //debugMsg("recv" + str);
+//        QList<QString> parameters = str.split(" ");
+//        receivedEvents.append(DetectedEvent(parameters.at(0),parameters.at(1),parameters.at(2).toFloat()));
+//    }
+//    emit generateEvent(receivedEvents);
+//}
+
 
 // see qt4 documentation for details on the macro (Qt Assistant app)
 // Mandatory  macro for plugins in qt4. Made obsolete in qt5

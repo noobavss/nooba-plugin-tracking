@@ -4,6 +4,7 @@
 #include <iostream>
 #include "featurenode.h"
 #include "detectedevent.h"
+#include "noobapluginapi.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -47,6 +48,12 @@ public:
     bool getShowOutputStatus(){return showOutput;}
     float getDistanceThreshold(){return threshold_distance;}
 
+    int setParent(NoobaPluginAPI *ownerPlugin){this->ownerPlugin = ownerPlugin;}
+    void saveConfig();
+    void loadConfig();
+
+    QImage convertToQImage(cv::Mat &cvImg);
+
 
 private:
     bool firstTime;
@@ -64,12 +71,9 @@ private:
     float threshold_distance;
     int threshold_inactive;
 
+
     cvb::CvTracks tracks;
-    void saveConfig();
-    void loadConfig();
-
-
-
+    NoobaPluginAPI *ownerPlugin;
 };
 
 #endif // BLOBTRACKINGNODE_H

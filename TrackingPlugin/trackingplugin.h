@@ -5,6 +5,7 @@
 #include "noobapluginapi.h"
 
 #include <QObject>
+#include <QImage>
 
 #include <detectedevent.h>
 #include <featurenode.h>
@@ -48,7 +49,6 @@ private:
     MixtureOfGaussianV2BGS mogBGS;
     BlobTrackingNode blobTrackingNode;
     FileWriterNode blobEventWriterNode;
-
 
 
 
