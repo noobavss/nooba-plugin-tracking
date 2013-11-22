@@ -17,6 +17,7 @@ void MixtureOfGaussianV2BGS::process(const cv::Mat &img_input, cv::Mat &img_outp
 
   loadConfig();
 
+    img_input.convertTo(img_input,CV_RGB2GRAY);
   if(firstTime)
     saveConfig();
 

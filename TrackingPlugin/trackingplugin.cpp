@@ -28,17 +28,8 @@ bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &par
     Q_UNUSED(params)
     img_mask = in.clone();
 
-   // qDebug() << "Frame ID:" << params.frameId();
-    // bgs->process(...) method internally shows the foreground mask image
-
-//    if(background_subtractor == "StaticFrameDifference"){
-//        staticBGS.process(in, img_mask);
-//    }else if(background_subtractor == "MixtureOfGaussianV2"){
-//        mogBGS.process(in, img_mask);
-//    }else{
-       // mogBGS.process(in, img_mask);
         staticBGS.process(in, img_mask);
-//    }
+
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2,2));
     cv::dilate(img_mask,img_mask, element,cv::Point(-1,-1),1);
     cv::erode(img_mask,img_mask, element,cv::Point(-1,-1),2);
@@ -175,10 +166,11 @@ void TrackingPlugin::onMultiValParamChanged(const QString &varName, const QStrin
     else if(varName == "show_blob_mask"){
         if(val == "Enable"){
             blobTrackingNode.toggleBlobMaskOutput(true);
+            setFrameViewerVisibility("Tracking Mask",false);
         }
         else{
             blobTrackingNode.toggleBlobMaskOutput(false);
-            cv::destroyWindow("Blob Mask");
+            setFrameViewerVisibility("Tracking Mask",false);
         }
         blobTrackingNode.saveConfig();
 
@@ -241,16 +233,17 @@ void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event,QImage i
 
 }
 
-//void TrackingPlugin::inputData(const PluginPassData& data){
+void TrackingPlugin::inputData(const QStringList &strList, QList<QImage> imageList){
+    Q_UNUSED(strList)
 
-//    QList<DetectedEvent> receivedEvents;
-//    foreach(QString str,data.strList()){
-//        //debugMsg("recv" + str);
-//        QList<QString> parameters = str.split(" ");
-//        receivedEvents.append(DetectedEvent(parameters.at(0),parameters.at(1),parameters.at(2).toFloat()));
-//    }
-//    emit generateEvent(receivedEvents);
-//}
+    cv::Mat frame(imageList.at(0).height(),imageList.at(0).width(),CV_8UC3,(uchar*)imageList.at(0).bits(),imageList.at(0).bytesPerLine());
+    cv::Mat bgmask(imageList.at(1).height(),imageList.at(1).width(),CV_8UC1,(uchar*)imageList.at(1).bits(),imageList.at(1).bytesPerLine());
+    //cv::imshow("test",bgmask);
+    //cv::imshow("test2",frame);
+
+    blobTrackingNode.process(frame, bgmask, img_blob);
+
+}
 
 
 // see qt4 documentation for details on the macro (Qt Assistant app)

@@ -32,6 +32,7 @@ public:
     bool init();
     bool release();
     PluginInfo getPluginInfo() const;
+
 public slots:
     void onStringParamChanged(const QString& varName, const QString& val);
     void onIntParamChanged(const QString &varName, int val);
@@ -39,6 +40,8 @@ public slots:
     void onMultiValParamChanged(const QString &varName, const QString &val);
     void onCaptureEvent(QList<DetectedEvent> captured_event);
     void onCaptureEvent(QList<DetectedEvent> captured_event,QImage image);
+
+    void inputData(const QStringList &strList, QList<QImage> imageList);
 
 private:
     QString output_file;
@@ -49,8 +52,6 @@ private:
     MixtureOfGaussianV2BGS mogBGS;
     BlobTrackingNode blobTrackingNode;
     FileWriterNode blobEventWriterNode;
-
-
 
 };
 

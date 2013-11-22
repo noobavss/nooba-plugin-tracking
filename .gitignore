@@ -22,3 +22,4 @@ ipch/*
 *.exe
 *.o
 *.so
+*pre1
