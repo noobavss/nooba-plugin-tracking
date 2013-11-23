@@ -11,7 +11,7 @@
 
 TrackingPlugin::TrackingPlugin()
 {
-    connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>,QImage)), this, SLOT(onCaptureEvent(QList<DetectedEvent>,QImage)));
+    connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>,QList<QImage>)), this, SLOT(onCaptureEvent(QList<DetectedEvent>,QList<QImage>)));
 
     //connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>)), this, SLOT(onCaptureEvent(QList<DetectedEvent>)));
     connect(&blobTrackingNode, SIGNAL(generateEvent(QList<DetectedEvent>)), &blobEventWriterNode, SLOT(captureEvent(QList<DetectedEvent>)));
@@ -218,18 +218,38 @@ void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event){
 
 }
 
-void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event,QImage image){
+//void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event,QImage image){
 
-    Q_UNUSED(image);
-    PluginPassData eventData;
+//    Q_UNUSED(image);
+//    PluginPassData eventData;
+//    foreach(DetectedEvent e, captured_event){
+//        //debugMsg(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
+//        eventData.appendStrList(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
+//    }
+//    //out_stream << frameIndex << "," << (*track).first << ","<< blob->centroid.x << "," << blob->centroid.y << "|";
+
+//    eventData.setImage(image);
+//    outputData(eventData);
+
+////    QList<QImage> images;
+////    QStringList strings;
+
+////    images.append(convertToQImage(image));
+////    images.append(convertToQImage(output));
+////    emit outputData(strings,images);
+
+//}
+void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event,QList<QImage> images){
+
+        QStringList strings;
+
     foreach(DetectedEvent e, captured_event){
         //debugMsg(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
-        eventData.appendStrList(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
+        strings.append(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
     }
     //out_stream << frameIndex << "," << (*track).first << ","<< blob->centroid.x << "," << blob->centroid.y << "|";
 
-    eventData.setImage(image);
-    outputData(eventData);
+    emit outputData(strings,images);
 
 }
 

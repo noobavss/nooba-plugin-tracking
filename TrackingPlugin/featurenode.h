@@ -18,6 +18,7 @@ public slots:
 signals:
     void generateEvent(QList<DetectedEvent> generated_event);
     void generateEvent(QList<DetectedEvent> generated_event,QImage image);
+    void generateEvent(QList<DetectedEvent> generated_event,QList<QImage> images);
 
 
 };

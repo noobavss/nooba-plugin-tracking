@@ -15,9 +15,11 @@ void StaticFrameDifferenceBGS::process(const cv::Mat &img_input, cv::Mat &img_ou
   if(img_input.empty())
     return;
 
-  if(img_background.empty())
-    img_input.copyTo(img_background);
-  
+ // if(img_background.empty())
+   // img_input.copyTo(img_background);
+  cv::Mat mat1 = cv::imread("/home/charith/Programming/FYP/Plugins/initialimg2.png",3);
+  img_background =mat1 ;
+
   loadConfig();
 
   if(firstTime)

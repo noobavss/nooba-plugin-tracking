@@ -39,7 +39,8 @@ public slots:
     void onDoubleParamChanged(const QString &varName, double val);
     void onMultiValParamChanged(const QString &varName, const QString &val);
     void onCaptureEvent(QList<DetectedEvent> captured_event);
-    void onCaptureEvent(QList<DetectedEvent> captured_event,QImage image);
+    //void onCaptureEvent(QList<DetectedEvent> captured_event,QImage image);
+    void onCaptureEvent(QList<DetectedEvent> captured_event,QList<QImage> images);
 
     void inputData(const QStringList &strList, QList<QImage> imageList);
 

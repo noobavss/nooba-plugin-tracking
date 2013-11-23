@@ -31,7 +31,8 @@ void BlobTrackingNode::process(const cv::Mat &img_input, const cv::Mat &img_mask
 {
     //This is output event
     QList<DetectedEvent> blobEvent;
-
+cv::Mat newInput;
+img_input.copyTo(newInput);
 
     if(img_input.empty() || img_mask.empty()){
         return;
@@ -85,8 +86,9 @@ void BlobTrackingNode::process(const cv::Mat &img_input, const cv::Mat &img_mask
                 cvb::CvBlob * blob = (*it).second;
 
                 if((*track).second->label == label){
+                    //qDebug()<< blob->minx <<","<<blob->miny;
                     //This is smoothed time tracked blob lables
-                    blobEvent.append(DetectedEvent("blob",QString("%1,%2,%3,%4").arg(frameIndex).arg((*track).first).arg(blob->centroid.x).arg(blob->centroid.y),1.0));
+                    blobEvent.append(DetectedEvent("blob",QString("%1,%2,%3,%4,%5,%6,%7,%8").arg(frameIndex).arg((*track).first).arg(blob->centroid.x).arg(blob->centroid.y).arg(blob->minx).arg(blob->miny).arg(blob->maxx).arg(blob->maxy),1.0));
                 }
             }
         }
@@ -119,9 +121,13 @@ void BlobTrackingNode::process(const cv::Mat &img_input, const cv::Mat &img_mask
     firstTime = false;
     frameIndex++;
 
-    QImage img((uchar*)img_output.data, img_output.cols, img_output.rows, img_output.step1(), QImage::Format_RGB888);
+    QImage input((uchar*)newInput.data, newInput.cols, newInput.rows, newInput.step1(), QImage::Format_RGB888);
+    QImage output((uchar*)img_output.data, img_output.cols, img_output.rows, img_output.step1(), QImage::Format_RGB888);
+    QList<QImage> images;
 
-    emit generateEvent(blobEvent,img);
+    images.append(input);
+    images.append(output);
+    emit generateEvent(blobEvent,images);
 
     //emit generateEvent(blobEvent);
 }
