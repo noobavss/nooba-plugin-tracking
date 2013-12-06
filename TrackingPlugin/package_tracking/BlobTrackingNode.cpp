@@ -9,6 +9,7 @@ BlobTrackingNode::BlobTrackingNode(FeatureNode *parent) :
     debugBlob(false),
     showBlobMask(true),
     showOutput(true),
+    showFrameID(true),
     frameIndex(0),
     threshold_distance(100.0),
     threshold_inactive(10)
@@ -100,7 +101,10 @@ img_input.copyTo(newInput);
     else{
         cvb::cvRenderTracks(tracks, frame, frame, CV_TRACK_RENDER_ID|CV_TRACK_RENDER_BOUNDING_BOX);
     }
-
+    if(showFrameID){
+        cv::Mat temp = cv::Mat(frame);
+        cv::putText(temp,QString("%1").arg(frameIndex).toStdString(),cv::Point(40,120),cv::FONT_HERSHEY_PLAIN,2,cv::Scalar(0,255,0),2);
+    }
     if(showOutput){
         cv::Mat temp = cv::Mat(frame);
         ownerPlugin->updateFrameViewer("Tracking Output",convertToQImage(temp));
@@ -209,8 +213,19 @@ QImage BlobTrackingNode::convertToQImage(cv::Mat &cvImg)
         return img;
     }
 }
+bool BlobTrackingNode::getShowFrameID() const
+{
+    return showFrameID;
+}
+
+void BlobTrackingNode::setShowFrameID(bool value)
+{
+    showFrameID = value;
+}
+
 
 
 void BlobTrackingNode::processEvents(const QList<DetectedEvent> event){
+    Q_UNUSED(event)
     //This is not suppose to recieve any event. Input is an image
 }

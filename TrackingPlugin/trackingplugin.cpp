@@ -26,19 +26,7 @@ TrackingPlugin::~TrackingPlugin()
 bool TrackingPlugin::procFrame( const cv::Mat &in, cv::Mat &out, ProcParams &params )
 {
     Q_UNUSED(params)
-    img_mask = in.clone();
-
-        staticBGS.process(in, img_mask);
-
-    cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2,2));
-    cv::dilate(img_mask,img_mask, element,cv::Point(-1,-1),1);
-    cv::erode(img_mask,img_mask, element,cv::Point(-1,-1),2);
-
-    //cv::imshow("BGS",img_mask);
-    blobTrackingNode.process(in, img_mask, img_blob);
-
-    in.copyTo(out);
-    //cv::cvtColor(img_blob, out, CV_BGR2GRAY);
+    cv::cvtColor(img_blob, out, CV_BGR2GRAY);
 
     return true;
 }
@@ -48,13 +36,15 @@ bool TrackingPlugin::init()
 
     QDateTime timestamp = QDateTime::currentDateTime();
     QStringList enable_disable_list;
-    QStringList bgsList;
+    QStringList disable_enable_list;
 
     enable_disable_list.append("Enable");
     enable_disable_list.append("Disable");
 
-    bgsList.append("StaticFrameDifference");
-    bgsList.append("MixtureOfGaussianV2");
+    disable_enable_list.append("Disable");
+    disable_enable_list.append("Enable");
+
+
 
     QDir dir(QDir::home());
     if(!dir.exists("NoobaVSS")){
@@ -77,12 +67,14 @@ bool TrackingPlugin::init()
     createIntParam("min_area",100,100000,0);
     createIntParam("max_area",20000,100000,0);
 
-    //createMultiValParam("enable_file_output",enable_disable_list);
     createMultiValParam("enable_file_output",enable_disable_list);
     createMultiValParam("show_blob_mask",enable_disable_list);
     createMultiValParam("show_blob_output",enable_disable_list);
+    createMultiValParam("show_frame_id",enable_disable_list);
 
-    createMultiValParam("Background Subtractor",bgsList);
+
+    createMultiValParam("show_blob_message",disable_enable_list);
+    showOutputBlobMessages = false;
 
     blobEventWriterNode.openFile(output_file);
     blobTrackingNode.setInactiveTimeThreshold(10);
@@ -90,8 +82,8 @@ bool TrackingPlugin::init()
     blobTrackingNode.setParent(this);
 
 
-    background_subtractor = "StaticFrameDifference";
     blobTrackingNode.saveConfig();
+
 
     createFrameViewer("Tracking Output");
     createFrameViewer("Tracking Mask");
@@ -188,63 +180,36 @@ void TrackingPlugin::onMultiValParamChanged(const QString &varName, const QStrin
 
         debugMsg("show_blob_mask set to " + val);
     }
-    else if(varName == "Background Subtractor"){
-        if(val == "StaticFrameDifference"){
-            background_subtractor = "StaticFrameDifference";
-        }
-        else if(val == "MixtureOfGaussianV2"){
-            background_subtractor = "MixtureOfGaussianV2";
+    else if(varName == "show_blob_message"){
+        if(val == "Enable"){
+            showOutputBlobMessages = true;
         }
         else{
-            background_subtractor = "StaticFrameDifference";
+            showOutputBlobMessages = false;
         }
-        blobTrackingNode.saveConfig();
 
-        debugMsg("Background Subtractor set to " + val);
+        debugMsg("show_blob_message set to " + val);
+    }
+    else if(varName == "show_frame_id"){
+        if(val == "Enable"){
+            blobTrackingNode.setShowFrameID(true);
+        }
+        else{
+            blobTrackingNode.setShowFrameID(false);
+        }
+
+        debugMsg("show_frame_id set to " + val);
     }
 }
 
-void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event){
-
-    PluginPassData eventData;
-    foreach(DetectedEvent e, captured_event){
-        //debugMsg(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
-        eventData.appendStrList(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
-    }
-    //out_stream << frameIndex << "," << (*track).first << ","<< blob->centroid.x << "," << blob->centroid.y << "|";
-
-    outputData(eventData);
-    //outputDataRequest(eventData);
-
-}
-
-//void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event,QImage image){
-
-//    Q_UNUSED(image);
-//    PluginPassData eventData;
-//    foreach(DetectedEvent e, captured_event){
-//        //debugMsg(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
-//        eventData.appendStrList(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
-//    }
-//    //out_stream << frameIndex << "," << (*track).first << ","<< blob->centroid.x << "," << blob->centroid.y << "|";
-
-//    eventData.setImage(image);
-//    outputData(eventData);
-
-////    QList<QImage> images;
-////    QStringList strings;
-
-////    images.append(convertToQImage(image));
-////    images.append(convertToQImage(output));
-////    emit outputData(strings,images);
-
-//}
 void TrackingPlugin::onCaptureEvent(QList<DetectedEvent> captured_event,QList<QImage> images){
 
         QStringList strings;
 
     foreach(DetectedEvent e, captured_event){
-        //debugMsg(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
+        if(showOutputBlobMessages){
+            debugMsg(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
+        }
         strings.append(QString(e.getIdentifier() + " " + e.getMessage() + " %1").arg(e.getConfidence()));
     }
     //out_stream << frameIndex << "," << (*track).first << ","<< blob->centroid.x << "," << blob->centroid.y << "|";

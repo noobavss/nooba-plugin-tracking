@@ -191,7 +191,7 @@ namespace cvb
             // Proximity matrix calculation and "used blob" list initialization:
             for (i=0; i<nBlobs; i++){
                 for (j=0; j<nTracks; j++){
-                    if (C(i, j) = (distantBlobTrack(B(i), T(j)) < thDistance))
+                    if ((C(i, j) = (distantBlobTrack(B(i), T(j)) < thDistance)))
                     {
                         AB(i)++;
                         AT(j)++;

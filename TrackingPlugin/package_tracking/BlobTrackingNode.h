@@ -48,12 +48,15 @@ public:
     bool getShowOutputStatus(){return showOutput;}
     float getDistanceThreshold(){return threshold_distance;}
 
-    int setParent(NoobaPluginAPI *ownerPlugin){this->ownerPlugin = ownerPlugin;}
+    void setParent(NoobaPluginAPI *ownerPlugin){this->ownerPlugin = ownerPlugin;}
     void saveConfig();
     void loadConfig();
 
     QImage convertToQImage(cv::Mat &cvImg);
 
+
+    bool getShowFrameID() const;
+    void setShowFrameID(bool value);
 
 private:
     bool firstTime;
@@ -65,7 +68,7 @@ private:
     bool debugBlob;
     bool showBlobMask;
     bool showOutput;
-
+    bool showFrameID;
     int frameIndex;
 
     float threshold_distance;
