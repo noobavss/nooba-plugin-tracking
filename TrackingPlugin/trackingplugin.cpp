@@ -69,7 +69,7 @@ bool TrackingPlugin::init()
 
     createMultiValParam("enable_file_output",enable_disable_list);
     createMultiValParam("show_blob_mask",enable_disable_list);
-    createMultiValParam("show_blob_output",enable_disable_list);
+    createMultiValParam("show_tracking_output",enable_disable_list);
     createMultiValParam("show_frame_id",enable_disable_list);
 
 
@@ -158,7 +158,7 @@ void TrackingPlugin::onMultiValParamChanged(const QString &varName, const QStrin
     else if(varName == "show_blob_mask"){
         if(val == "Enable"){
             blobTrackingNode.toggleBlobMaskOutput(true);
-            setFrameViewerVisibility("Tracking Mask",false);
+            setFrameViewerVisibility("Tracking Mask",true);
         }
         else{
             blobTrackingNode.toggleBlobMaskOutput(false);
@@ -168,17 +168,19 @@ void TrackingPlugin::onMultiValParamChanged(const QString &varName, const QStrin
 
         debugMsg("show_blob_mask set to " + val);
     }
-    else if(varName == "show_blob_output"){
+    else if(varName == "show_tracking_output"){
         if(val == "Enable"){
             blobTrackingNode.toggleShowOutput(true);
+            setFrameViewerVisibility("Tracking Output",true);
         }
         else{
             blobTrackingNode.toggleShowOutput(false);
-            cv::destroyWindow("Blob Tracking");
+            setFrameViewerVisibility("Tracking Output",false);
+            //cv::destroyWindow("Blob Tracking");
         }
         blobTrackingNode.saveConfig();
 
-        debugMsg("show_blob_mask set to " + val);
+        debugMsg("show_tracking_output set to " + val);
     }
     else if(varName == "show_blob_message"){
         if(val == "Enable"){
