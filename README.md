@@ -1,4 +1,5 @@
 nooba-plugin-tracking
 =====================
 
-tracking plugin for the current Nooba plugin API
+Background Subtraction Based Tracking Plugin for NoobaVSS
+
